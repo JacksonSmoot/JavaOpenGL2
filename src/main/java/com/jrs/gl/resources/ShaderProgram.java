@@ -73,9 +73,24 @@ public class ShaderProgram implements AutoCloseable{
         return loc;
     }
 
-    public void setUniform4f(String name, float x, float y, float z, float w) {
+    public void setUniform1f(String name, float f1) {
         int loc = uniformLocation(name);
-        if (loc != -1) glUniform4f(loc, x, y, z, w);
+        if (loc != -1) glUniform1f(loc, f1);
+    }
+
+    public void setUniform2f(String name, float f1, float f2) {
+        int loc = uniformLocation(name);
+        if (loc != -1) glUniform2f(loc, f1, f2);
+    }
+
+    public void setUniform3f(String name, float f1, float f2, float f3) {
+        int loc = uniformLocation(name);
+        if (loc != -1) glUniform3f(loc, f1, f2, f3);
+    }
+
+    public void setUniform4f(String name, float f1, float f2, float f3, float f4) {
+        int loc = uniformLocation(name);
+        if (loc != -1) glUniform4f(loc, f1, f2, f3, f4);
     }
 
     public void setUniform1i(String name, int v) {

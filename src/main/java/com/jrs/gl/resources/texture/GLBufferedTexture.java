@@ -84,4 +84,8 @@ public class GLBufferedTexture extends GLImage {
         // Unbind texture
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+    public GLImage asGLImage() {
+        return new GLImage(textureID, width, height);
+    }
 }

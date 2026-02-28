@@ -3,6 +3,7 @@ package com.jrs.gl.input.mouse;
 import org.lwjgl.glfw.GLFWCursorPosCallbackI;
 import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,8 @@ public final class MouseInputHandler {
 
     private final List<MouseInputListener> listeners = new ArrayList<>();
     private final long window;
+
+    private boolean mouseDown;
 
     private double mx, my = 0;
 
@@ -31,13 +34,16 @@ public final class MouseInputHandler {
     public double getMy(){
         return my;
     }
+
     // Create separate callback instances:
     public final GLFWMouseButtonCallbackI mouseButtonCallback = (win, button, action, mods) -> {
         double[] p = getMousePos(win);
         if (action == GLFW_PRESS) {
+            mouseDown = true;
             for (var l : listeners)
                 l.mouseButtonPressed(new MouseInputEvent(win, button, action, mods, p[0], p[1]));
         } else if (action == GLFW_RELEASE) {
+            mouseDown = false;
             for (var l : listeners)
                 l.mouseButtonReleased(new MouseInputEvent(win, button, action, mods, p[0], p[1]));
         }
@@ -47,7 +53,12 @@ public final class MouseInputHandler {
         mx = x;
         my = y;
         for (var l : listeners)
-            l.mouseMoved(new MouseInputEvent(win, 0, 0, 0, x, y));
+            if(mouseDown){
+                l.mouseDragged(new MouseInputEvent(win, 0, 0, 0, x, y));
+            } else {
+                l.mouseMoved(new MouseInputEvent(win, 0, 0, 0, x, y));
+            }
+
     };
 
     public double[] getMousePos(long window) {

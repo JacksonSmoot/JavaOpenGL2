@@ -8,32 +8,29 @@ import com.jrs.gl.input.keyboard.KeyboardInputListener;
 import com.jrs.gl.input.mouse.MouseInputEvent;
 import com.jrs.gl.input.mouse.MouseInputListener;
 import com.jrs.gl.resources.texture.GLBufferedTexture;
-import com.jrs.gl.text.AwtText;
-import com.jrs.media.MusicPlayerV2;
-import com.jrs.media.MusicPlayerV3;
+import com.jrs.gl.resources.texture.GLImage;
+import com.jrs.media.AudioPlayer;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.nio.file.Path;
 
-public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputListener {
+public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputListener, AutoCloseable {
     private Window window;
 
-    private MusicPlayerV3 player;
+    private AudioPlayer player;
 
     private Rectangle sliderBounds;
 
     private Rectangle playBounds;
+
+    private GLImage albumArt;
 
     private int texW, texH, maxImageWidth;
 
     private boolean draggingSlider = false;
 
     private boolean playerPaused = false;
-
-    private Font font;
-
-    private String songName;
 
     private Path path;
 
@@ -51,15 +48,9 @@ public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputLis
 
         window.getGL2D().setClearColor(0, 0, 0, 0);
 
-        // font = AwtText.loadTtf(Path.of("/Users/jacksonsmoot/com/jrs/dev/JavaOpenGL2/src/main/resources/OpenSans-VariableFont_wdth,wght.ttf"), 24f);
+        player = new AudioPlayer(path);
 
-        // Path musicPath = Path.of();
-        // Path musicPath = Path.of("/Users/jacksonsmoot/com/jrs/dev/JavaOpenGL2/src/main/resources/308 Nuts instrumental - Novox Karaokey.m4a");
-        // Path musicPath = Path.of("/Users/jacksonsmoot/com/jrs/dev/JavaOpenGL2/src/main/resources/A Series of Unfortunate Events Theme.mp3");
-        // Path musicPath = Path.of("/Users/jacksonsmoot/com/jrs/dev/JavaOpenGL2/src/main/resources/311 Punkrocker feat Iggy Pop - Teddybears.m4a");
-        songName = path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf("."));
-
-        player = new MusicPlayerV3(path);
+        player.setLooping(true);
 
         player.start();
 
@@ -71,12 +62,13 @@ public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputLis
 
         maxImageWidth = sliderBounds.width / 3;
 
-        if(player.getAlbumArt()!=null){
-            GLBufferedTexture tex = player.getAlbumArt();
-            texW = Math.min(tex.getWidth(), maxImageWidth);
-            texH = tex.getHeight();
-            if(texW != tex.getWidth()){
-                texH = (int)((double)tex.getHeight() * ((double)texW / (double)tex.getWidth()));
+        albumArt = player.getAlbumArt();
+
+        if(albumArt!=null){
+            texW = Math.min(albumArt.getWidth(), maxImageWidth);
+            texH = albumArt.getHeight();
+            if(texW != albumArt.getWidth()){
+                texH = (int)((double)albumArt.getHeight() * ((double)texW / (double)albumArt.getWidth()));
             }
         }
 
@@ -92,41 +84,34 @@ public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputLis
     }
 
     private boolean isMouseInSliderBounds(int mx, int my){
-        // return isMouseInRectBounds(sliderBounds, mx, my);
         return mx >= sliderBounds.x && mx <= sliderBounds.x + sliderBounds.width &&
                 my >= sliderBounds.y && my <= sliderBounds.y + sliderBounds.height;
     }
 
     public void run() throws InterruptedException {
         player.play();
-
-//        GLBufferedTexture titleTex = AwtText.uploadTextToTexture(
-//                font,
-//                "Now Playing: "+songName,
-//                new Color(255, 255, 255, 255),
-//                2
-//        );
-
         while (!window.shouldClose()) {
             GL2D g2d = window.getGL2D();
+            g2d.mount();
             g2d.clear();
 
-            if(player.getAlbumArt()!=null){
-                GLBufferedTexture tex = player.getAlbumArt();
-                g2d.drawImage(tex, sliderBounds.x, sliderBounds.y - texH - sliderBounds.height, texW, texH, GL2D.IMAGE_VFLIP);
+            if(albumArt!=null){
+                int outline_size = 5;
+                g2d.fillRoundRect(sliderBounds.x - outline_size, sliderBounds.y - texH - sliderBounds.height - outline_size, texW + (outline_size*2), texH + (outline_size*2), 10, 255, 255, 255, 255);
+                g2d.drawImage(albumArt, sliderBounds.x, sliderBounds.y - texH - sliderBounds.height, texW, texH, GL2D.IMAGE_VFLIP);
             }
 
-            g2d.fillRect(sliderBounds.x, sliderBounds.y, sliderBounds.width, sliderBounds.height, 128, 128, 128, 0);
+            g2d.fillRect(sliderBounds.x, sliderBounds.y, sliderBounds.width, sliderBounds.height, 128, 128, 128, 255);
             {
                 if(draggingSlider){
                     int rmx = Math.clamp((long)window.getMx(), sliderBounds.x, sliderBounds.x + sliderBounds.width);
                     int dx = (int)rmx - sliderBounds.x;
-                    g2d.fillRect(sliderBounds.x, sliderBounds.y, dx, sliderBounds.height, 255, 0, 0, 0);
+                    g2d.fillRect(sliderBounds.x, sliderBounds.y, dx, sliderBounds.height, 255, 0, 0, 255);
                 }
                 else{
                     double time_prop = (double)sliderBounds.width / player.getDurationNs();
                     int rwidth = (int)(time_prop * player.getElapsedNs());
-                    g2d.fillRect(sliderBounds.x, sliderBounds.y, rwidth, sliderBounds.height, 255, 0, 0, 0);
+                    g2d.fillRect(sliderBounds.x, sliderBounds.y, rwidth, sliderBounds.height, 255, 0, 0, 255);
                 }
             }
 
@@ -138,16 +123,13 @@ public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputLis
                 g2d.fillRect(playBounds.x + ((playBounds.width/3)*2), playBounds.y, playBounds.width / 3, playBounds.width, 255, 255, 255, 255);
             }
 
+
+
             // g2d.drawImage(titleTex, 0, 0, GL2D.IMAGE_VFLIP);
             window.pollEvents();
-            window.swapBuffers();
+            g2d.unmount();
+            g2d.flip();
         }
-
-
-
-        player.close();
-
-        window.close();
     }
 
     private void playerSwitchSate(){
@@ -215,5 +197,14 @@ public class MusicPlayerGraphics implements KeyboardInputListener, MouseInputLis
     @Override
     public void mouseDragged(MouseInputEvent e) {
 
+    }
+
+    @Override
+    public void close(){
+        try{
+            player.close();
+        } catch (InterruptedException ignored) {}
+        if(albumArt != null) albumArt.close();
+        window.close();
     }
 }

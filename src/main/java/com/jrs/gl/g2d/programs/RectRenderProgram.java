@@ -26,16 +26,28 @@ public class RectRenderProgram {
         vao.bind();
         vbo.bind();
 
-        glBufferData(GL_ARRAY_BUFFER, 12L * Float.BYTES, GL_DYNAMIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
+        // 6 vertices, each has vec2 aLocal in [0..1]
+        float[] quad = {
+                0f, 0f,
+                1f, 0f,
+                1f, 1f,
+                0f, 0f,
+                1f, 1f,
+                0f, 1f
+        };
+        glBufferData(GL_ARRAY_BUFFER, quad, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * Float.BYTES, 0L);
         glEnableVertexAttribArray(0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        vbo.unbind();
+        GLVertexArray.unbind();
     }
 
     public GLBuffer getVBO() { return vbo; }
     public GLVertexArray getVAO() { return vao; }
     public ShaderProgram getShader() { return shader; }
+
+//    public void unbindProgram(){
+//        vbo.
+//    }
 }

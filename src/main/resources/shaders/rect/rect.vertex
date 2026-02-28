@@ -1,6 +1,27 @@
+// #version 330 core
+// layout (location = 0) in vec2 aPos;
+
+// void main() {
+//     gl_Position = vec4(aPos, 0.0, 1.0);
+// }
+
 #version 330 core
-layout (location = 0) in vec2 aPos;
+
+layout (location = 0) in vec2 aLocal; // (0,0)(1,0)(1,1)(0,1)
+
+uniform vec2 uPosPx;      // top-left corner in pixels
+uniform vec2 uSizePx;     // (w,h) in pixels
+uniform vec2 uViewport;   // window size in pixels
+
+out vec2 vPx; // pixel position inside the rect (0..w, 0..h)
 
 void main() {
-    gl_Position = vec4(aPos, 0.0, 1.0);
+    vPx = aLocal * uSizePx;
+    vec2 screenPx = uPosPx + vPx;
+
+    // Pixel -> NDC (top-left origin)
+    float x = (screenPx.x / uViewport.x) * 2.0 - 1.0;
+    float y = 1.0 - (screenPx.y / uViewport.y) * 2.0;
+
+    gl_Position = vec4(x, y, 0.0, 1.0);
 }

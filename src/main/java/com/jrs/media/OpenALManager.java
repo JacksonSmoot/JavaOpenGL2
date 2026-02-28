@@ -1,5 +1,6 @@
 package com.jrs.media;
 
+import com.jrs.gl.util.BooleanRequest;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.ALC;
 import org.lwjgl.system.MemoryUtil;
@@ -30,9 +31,13 @@ public final class OpenALManager implements AutoCloseable {
 
     private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<>();
 
+    private final BooleanRequest blocked = new BooleanRequest();
+
     private Thread alThread;
 
     private volatile boolean running = false;
+
+
 
     private long device = NULL;
 
@@ -69,8 +74,17 @@ public final class OpenALManager implements AutoCloseable {
         });
         OpenALStream stream = freeStreamsQueue.take();
         streams.add(stream);
-        System.out.println("STREAM FOUND!");
         return stream;
+    }
+
+    void requestStreamClose(OpenALStream stream) {
+        blocked.requestAndWait();
+        System.out.println("GOT BACK");
+        streams.remove(stream);
+        stop(stream);
+        alDeleteBuffers(stream.buffers);
+        alDeleteSources(stream.source);
+        blocked.reset();
     }
 
     private void start(){
@@ -257,6 +271,7 @@ public final class OpenALManager implements AutoCloseable {
         open();
         try {
             while (running) {
+                blocked.respondAndHang();
                 // 1) run at least one command (blocks until something arrives)
                 // Runnable r = commandQueue.take();
                 Runnable r = commandQueue.poll(5, TimeUnit.MILLISECONDS);

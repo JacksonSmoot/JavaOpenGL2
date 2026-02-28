@@ -60,7 +60,11 @@ public final class WindowBuilder {
         if (forwardCompat) glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
         long handle = glfwCreateWindow(width, height, title, NULL, NULL);
-        if (handle == NULL) throw new RuntimeException("Failed to create GLFW window");
+
+        if (handle == NULL) {
+            CrashHandler.propException(new RuntimeException("Failed to create GLFW window"));
+            System.exit(-1);
+        }
 
         // runtime attributes (must be after create)
         if (floating) glfwSetWindowAttrib(handle, GLFW_FLOATING, GLFW_TRUE);

@@ -33,6 +33,8 @@ public final class OpenALStream implements AutoCloseable {
 
     boolean shouldPlay = false;
 
+    boolean closed = false;
+
     public OpenALStream(int source, int[] buffers) {
         this.source = source;
         this.buffers = buffers;
@@ -42,7 +44,9 @@ public final class OpenALStream implements AutoCloseable {
 
     @Override
     public void close() {
-
+        if(closed) return;
+        OpenALManager.manager.requestStreamClose(this);
+        closed = true;
     }
 
     public void setSampleRate(int sampleRate) {

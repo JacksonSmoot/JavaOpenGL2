@@ -43,4 +43,4 @@ bin/
 .DS_Store
 
 ### Custom ###
-src/main/resources/demoAssets/
+src/main/resources/demos

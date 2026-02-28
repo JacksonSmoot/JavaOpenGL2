@@ -1,10 +1,4 @@
 package com.jrs.gl.g2d.programs;
-//float[] verts = {
-//        // x,    y,     r,   g,   b
-//        0.0f,  0.6f,  1f,  0f,  0f,  // top = red
-//        -0.6f, -0.6f,  0f,  1f,  0f,  // left = green
-//        0.6f, -0.6f,  0f,  0f,  1f   // right = blue
-//};
 
 import com.jrs.gl.resources.GLBuffer;
 import com.jrs.gl.resources.GLVertexArray;
@@ -42,7 +36,7 @@ public class ShadedTriangleRenderProgram {
         glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, 2L * Float.BYTES);
         glEnableVertexAttribArray(1);
 
-        GLBuffer.unbind(GL_ARRAY_BUFFER);
+        vbo.unbind();
         GLVertexArray.unbind();
     }
 

@@ -1,0 +1,13 @@
+#version 330 core
+
+uniform vec2 uPts[3];     // (x,y) in pixels, top-left origin
+uniform vec2 uViewport;   // (width,height) in pixels
+
+void main() {
+    vec2 screenPx = uPts[gl_VertexID];
+
+    float x = (screenPx.x / uViewport.x) * 2.0 - 1.0;
+    float y = 1.0 - (screenPx.y / uViewport.y) * 2.0;
+
+    gl_Position = vec4(x, y, 0.0, 1.0);
+}

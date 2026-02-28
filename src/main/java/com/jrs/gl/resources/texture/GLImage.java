@@ -22,4 +22,8 @@ public class GLImage extends GLTexture{
     public int getHeight() {
         return height;
     }
+
+    public GLBufferedTexture asBufferedTexture() {
+        return new GLBufferedTexture(textureID, width, height);
+    }
 }

@@ -36,7 +36,8 @@ public class ImageRenderProgram {
         glVertexAttribPointer(1, 2, GL_FLOAT, false, stride, 2L * Float.BYTES);
         glEnableVertexAttribArray(1);
 
-        GLBuffer.unbind(GL_ARRAY_BUFFER);
+        // GLBuffer.unbind(GL_ARRAY_BUFFER);
+        vbo.unbind();
         GLVertexArray.unbind();
     }
 

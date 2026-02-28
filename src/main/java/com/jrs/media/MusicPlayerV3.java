@@ -52,9 +52,6 @@ public class MusicPlayerV3 {
 
     private OpenALStream openALStream;
 
-    // Audio output
-    // private OpenALStreamer openAL;
-
     private int outRate = -1;
 
     private AVChannelLayout outChLayout;

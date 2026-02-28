@@ -19,20 +19,8 @@ public class TriangleRenderProgram {
 
     public TriangleRenderProgram(ShaderProgram shader) {
         this.shader = shader;
-
         this.vao = new GLVertexArray();
-        this.vbo = new GLBuffer(GL_ARRAY_BUFFER);
-
-        vao.bind();
-        vbo.bind();
-
-        glBufferData(GL_ARRAY_BUFFER, 6L * Float.BYTES, GL_DYNAMIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
-        glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        this.vbo = null;
     }
 
     public GLBuffer getVBO() { return vbo; }
